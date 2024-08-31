@@ -1,0 +1,35 @@
+/* src/components/HomePage.css */
+
+body {
+  background-color: white;
+  color: black;
+}
+
+.dark-mode {
+  background-color: #121212;
+  color: white;
+}
+
+.navbar-brand img {
+  margin-right: 10px;
+}
+
+.input-group {
+  max-width: 600px;
+}
+
+.btn-success {
+  margin-left: 5px;
+}
+
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.countdown {
+  font-weight: bold;
+  margin-top: 10px;
+}
