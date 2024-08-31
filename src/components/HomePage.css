@@ -1,35 +1,177 @@
 /* src/components/HomePage.css */
 
+/* General body styles */
 body {
   background-color: white;
   color: black;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  padding-top: 56px; /* Offset for fixed navbar */
+  padding-bottom: 56px; /* Offset for fixed footer */
 }
 
+/* Dark mode styles */
 .dark-mode {
   background-color: #121212;
   color: white;
 }
 
+/* App container */
+.app-container {
+  padding: 20px;
+  min-height: calc(100vh - 112px); /* Adjusted for fixed navbar and footer */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Navbar styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1030; /* Above other content */
+  background-color: #343a40;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
 .navbar-brand img {
+  height: 30px;
   margin-right: 10px;
 }
 
+.navbar-nav .nav-item {
+  margin-right: 15px;
+}
+
+.navbar .btn {
+  margin-left: 10px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+/* Input group styles */
 .input-group {
-  max-width: 600px;
+  max-width: 800px;
+  margin: 10px auto;
+  display: flex;
+  align-items: center;
+}
+
+.input-group .form-control {
+  flex: 2; /* Takes more space */
+  margin-right: 5px;
+}
+
+.input-group .btn {
+  flex: 1; /* Takes less space */
+}
+
+/* Button styles */
+.btn {
+  margin: 5px;
+  padding: 8px 12px;
+  font-size: 14px;
+  height: 38px;
 }
 
 .btn-success {
-  margin-left: 5px;
+  background-color: #28a745;
+  border-color: #28a745;
 }
 
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* List group styles */
 .list-group-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px;
+  margin-bottom: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
 }
 
+.list-group-item button {
+  margin-left: 10px;
+}
+
+/* Text styles */
+.text-center {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+#userGreeting {
+  font-size: 1.2em;
+  margin-bottom: 15px;
+}
+
+#date-time,
+#greeting,
+#clickcount {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+/* Countdown styles */
 .countdown {
-  font-weight: bold;
   margin-top: 10px;
+  font-size: 1.2em;
+}
+
+/* Footer styles */
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  padding: 10px 0;
+  text-align: center;
+  border-top: none; /* Remove any separator line */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .input-group {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .form-control {
+    margin-bottom: 10px;
+  }
+
+  .navbar-nav .nav-item {
+    margin-right: 0;
+  }
 }
