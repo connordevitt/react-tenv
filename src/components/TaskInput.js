@@ -2,11 +2,25 @@
 
 import React from 'react';
 
-function TaskInput({ newTask, setNewTask, taskPriority, setTaskPriority, taskDeadline, setTaskDeadline, addTask }) {
+function TaskInput({
+  newTask,
+  setNewTask,
+  taskPriority,
+  setTaskPriority,
+  taskDeadline,
+  setTaskDeadline,
+  addTask,
+}) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent form submission or page reload
+      addTask();
+    }
+  };
+
   return (
     <section id="todo-input" className="mb-3 text-center">
       <div className="input-group mb-2 mx-auto" style={{ maxWidth: '800px' }}>
-        {/* Task Text Input */}
         <input
           type="text"
           id="input-box"
@@ -14,8 +28,8 @@ function TaskInput({ newTask, setNewTask, taskPriority, setTaskPriority, taskDea
           placeholder="Add some text!"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
+          onKeyDown={handleKeyDown} // Add this line to listen for Enter key
         />
-        {/* Priority Dropdown */}
         <select
           id="taskPriority"
           className="form-select"
@@ -26,15 +40,14 @@ function TaskInput({ newTask, setNewTask, taskPriority, setTaskPriority, taskDea
           <option value="Medium">Medium</option>
           <option value="High">High</option>
         </select>
-        {/* Deadline Input */}
         <input
           type="date"
           id="task-deadline"
           className="form-control"
           value={taskDeadline}
           onChange={(e) => setTaskDeadline(e.target.value)}
+          onKeyDown={handleKeyDown} // Ensure this line is here for the deadline input as well
         />
-        {/* Add Task Button */}
         <button
           id="add-task-button"
           className="btn btn-success"

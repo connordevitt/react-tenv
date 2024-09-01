@@ -8,6 +8,7 @@ import Navbar from './Navbar';
 import TaskInput from './TaskInput';
 import TaskList from './TaskList';
 import ListManager from './ListManager';
+import ConfirmModal from './ConfirmModal';
 
 function HomePage() {
   const [lists, setLists] = useState(() => {
@@ -21,6 +22,15 @@ function HomePage() {
   const [taskDeadline, setTaskDeadline] = useState('');
   const [newListTitle, setNewListTitle] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [showTimeoutNotification, setShowTimeoutNotification] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editedTaskText, setEditedTaskText] = useState('');
+  const [editedTaskPriority, setEditedTaskPriority] = useState('Medium');
+  const [editedTaskDeadline, setEditedTaskDeadline] = useState('');
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [taskToRemove, setTaskToRemove] = useState(null);
+  const [showRemoveNotification, setShowRemoveNotification] = useState(false);
 
   useEffect(() => {
     const gtagScript = document.createElement('script');
@@ -53,7 +63,7 @@ function HomePage() {
         if (list.id === currentListId) {
           return {
             ...list,
-            tasks: [...list.tasks, { id: Date.now(), text: newTask, priority: taskPriority, deadline: taskDeadline }],
+            tasks: [...list.tasks, { id: Date.now(), text: newTask, priority: taskPriority, deadline: taskDeadline, completed: false }],
           };
         }
         return list;
@@ -64,17 +74,34 @@ function HomePage() {
     }
   };
 
-  const removeTask = (taskId) => {
+  const confirmRemoveTask = (taskId) => {
+    setTaskToRemove(taskId);
+    setShowConfirmModal(true);
+  };
+
+  const removeTask = () => {
     const updatedLists = lists.map(list => {
       if (list.id === currentListId) {
         return {
           ...list,
-          tasks: list.tasks.filter(task => task.id !== taskId),
+          tasks: list.tasks.filter(task => task.id !== taskToRemove),
         };
       }
       return list;
     });
     setLists(updatedLists);
+    setShowConfirmModal(false);
+    setTaskToRemove(null);
+    setShowRemoveNotification(true);
+
+    setTimeout(() => {
+      setShowRemoveNotification(false);
+    }, 2000);
+  };
+
+  const handleCancelRemove = () => {
+    setShowConfirmModal(false);
+    setTaskToRemove(null);
   };
 
   const toggleDarkMode = () => {
@@ -98,13 +125,76 @@ function HomePage() {
     setCurrentListId(listId);
   };
 
+  const startEditingTask = (task) => {
+    setEditingTaskId(task.id);
+    setEditedTaskText(task.text);
+    setEditedTaskPriority(task.priority);
+    setEditedTaskDeadline(task.deadline);
+  };
+
+  const saveTask = () => {
+    const updatedLists = lists.map(list => {
+      if (list.id === currentListId) {
+        return {
+          ...list,
+          tasks: list.tasks.map(task => {
+            if (task.id === editingTaskId) {
+              return {
+                ...task,
+                text: editedTaskText,
+                priority: editedTaskPriority,
+                deadline: editedTaskDeadline,
+              };
+            }
+            return task;
+          }),
+        };
+      }
+      return list;
+    });
+    setLists(updatedLists);
+    setEditingTaskId(null);
+    setShowSaveNotification(true);
+
+    setTimeout(() => {
+      setShowSaveNotification(false);
+    }, 2000);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveTask();
+    }
+  };
+
+  const toggleTaskCompletion = (taskId) => {
+    const updatedLists = lists.map(list => {
+      if (list.id === currentListId) {
+        return {
+          ...list,
+          tasks: list.tasks.map(task => {
+            if (task.id === taskId) {
+              return { ...task, completed: !task.completed };
+            }
+            return task;
+          }),
+        };
+      }
+      return list;
+    });
+    setLists(updatedLists);
+  };
+
   const currentList = lists.find(list => list.id === currentListId);
 
   return (
     <div className={`app-container ${darkMode ? 'dark-mode' : ''}`}>
-      <div id="timeout-notification" className="alert alert-danger text-center" role="alert">
-        Session timed out. Welcome, Guest!
-      </div>
+      {/* Conditionally render the timeout notification */}
+      {showTimeoutNotification && (
+        <div id="timeout-notification" className="alert alert-danger text-center" role="alert">
+          Session timed out. Welcome, Guest!
+        </div>
+      )}
 
       <Navbar toggleDarkMode={toggleDarkMode} />
 
@@ -156,12 +246,58 @@ function HomePage() {
         />
 
         {/* Task List Component */}
-        <TaskList currentList={currentList} removeTask={removeTask} />
+        <TaskList
+          currentList={currentList}
+          removeTask={confirmRemoveTask}
+          startEditingTask={startEditingTask}
+          editingTaskId={editingTaskId}
+          editedTaskText={editedTaskText}
+          setEditedTaskText={setEditedTaskText}
+          editedTaskPriority={editedTaskPriority}
+          setEditedTaskPriority={setEditedTaskPriority}
+          editedTaskDeadline={editedTaskDeadline}
+          setEditedTaskDeadline={setEditedTaskDeadline}
+          saveTask={saveTask}
+          handleKeyDown={handleKeyDown}
+          toggleTaskCompletion={toggleTaskCompletion}
+        />
 
-        <div className="text-center mb-3">
-          <button className="btn btn-danger me-2">Clear Completed</button>
-          <button className="btn btn-primary">Load Tasks</button>
-        </div>
+        {/* Bootstrap Toast for Save Notification */}
+        {showSaveNotification && (
+          <div className="position-fixed top-0 start-50 translate-middle-x p-3" style={{ zIndex: 1050 }}>
+            <div className="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+              <div className="d-flex">
+                <div className="toast-body">
+                  Task saved successfully!
+                </div>
+                <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bootstrap Toast for Remove Notification */}
+        {showRemoveNotification && (
+          <div className="position-fixed top-0 start-50 translate-middle-x p-3" style={{ zIndex: 1050 }}>
+            <div className="toast align-items-center text-white bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+              <div className="d-flex">
+                <div className="toast-body">
+                  Task removed successfully!
+                </div>
+                <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal for Task Removal */}
+        <ConfirmModal
+          show={showConfirmModal}
+          handleClose={handleCancelRemove}
+          handleConfirm={removeTask}
+          taskText={taskToRemove ? currentList?.tasks.find(task => task.id === taskToRemove)?.text : ''}
+        />
+
       </div>
 
       <footer className="text-center">
