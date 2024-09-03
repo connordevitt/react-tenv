@@ -1,12 +1,11 @@
-
 body {
   background-color: white;
   color: black;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  padding-top: 56px; 
-  padding-bottom: 56px; 
+  padding-top: 56px;
+  padding-bottom: 56px;
 }
 
 .dark-mode {
@@ -14,22 +13,20 @@ body {
   color: white;
 }
 
-
 .app-container {
   padding: 20px;
-  min-height: calc(100vh - 112px); 
+  min-height: calc(100vh - 112px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
 }
 
-
 .navbar {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1030; 
+  z-index: 1030;
   background-color: #343a40;
 }
 
@@ -53,7 +50,6 @@ body {
   font-size: 14px;
 }
 
-
 .input-group {
   max-width: 800px;
   margin: 10px auto;
@@ -62,14 +58,13 @@ body {
 }
 
 .input-group .form-control {
-  flex: 2; 
+  flex: 2;
   margin-right: 5px;
 }
 
 .input-group .btn {
-  flex: 1; 
+  flex: 1;
 }
-
 
 .btn {
   margin: 5px;
@@ -117,7 +112,6 @@ body {
   margin-left: 10px;
 }
 
-
 .text-center {
   text-align: center;
   margin-bottom: 15px;
@@ -135,7 +129,6 @@ body {
   margin-bottom: 10px;
 }
 
-
 .countdown {
   margin-top: 10px;
   font-size: 1.2em;
@@ -149,7 +142,8 @@ footer {
   background-color: #f8f9fa;
   padding: 10px 0;
   text-align: center;
-  border-top: none; 
+  border-top: none;
+  height: 12%;
 }
 
 /* Responsive adjustments */

@@ -5,7 +5,6 @@ import React from 'react';
 function ListManager({ newListTitle, setNewListTitle, addNewList, lists, changeList, currentList }) {
   return (
     <div className="text-center mb-3">
-      {/* Combined Input and Dropdown Section */}
       <div className="input-group mb-3 mx-auto" style={{ maxWidth: '600px' }}>
         <input
           type="text"
@@ -22,14 +21,13 @@ function ListManager({ newListTitle, setNewListTitle, addNewList, lists, changeL
           + Add List
         </button>
 
-        {/* Dropdown to select current list */}
         <button
           className="btn btn-secondary dropdown-toggle"
           type="button"
           id="listDropdownButton"
           data-bs-toggle="dropdown"
           aria-expanded="false"
-          style={{ marginLeft: '5px' }} // Optional styling for space between elements
+          style={{ marginLeft: '5px' }} 
         >
           {currentList?.title || 'Select List'}
         </button>

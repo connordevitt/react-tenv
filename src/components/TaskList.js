@@ -17,7 +17,6 @@ function TaskList({
   handleKeyDown,
   toggleTaskCompletion,
 }) {
-  // Function to determine the style based on priority
   const getPriorityBadge = (priority) => {
     switch (priority) {
       case 'High':
