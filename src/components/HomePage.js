@@ -31,6 +31,7 @@ function HomePage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToRemove, setTaskToRemove] = useState(null);
   const [showRemoveNotification, setShowRemoveNotification] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState([]); // State for tracking selected tasks
 
   useEffect(() => {
     const gtagScript = document.createElement('script');
@@ -185,6 +186,37 @@ function HomePage() {
     setLists(updatedLists);
   };
 
+  const toggleSelectTask = (taskId) => {
+    setSelectedTasks(prevSelected =>
+      prevSelected.includes(taskId)
+        ? prevSelected.filter(id => id !== taskId)
+        : [...prevSelected, taskId]
+    );
+  };
+
+  const removeSelectedTasks = () => {
+    const updatedLists = lists.map(list => {
+      if (list.id === currentListId) {
+        return {
+          ...list,
+          tasks: list.tasks.filter(task => !selectedTasks.includes(task.id)),
+        };
+      }
+      return list;
+    });
+    setLists(updatedLists);
+    setSelectedTasks([]); // Reset selected tasks
+  };
+
+  const selectAllTasks = (isChecked) => {
+    if (isChecked) {
+      const allTaskIds = currentList?.tasks.map(task => task.id) || [];
+      setSelectedTasks(allTaskIds);
+    } else {
+      setSelectedTasks([]);
+    }
+  };
+
   const currentList = lists.find(list => list.id === currentListId);
 
   return (
@@ -260,6 +292,10 @@ function HomePage() {
           saveTask={saveTask}
           handleKeyDown={handleKeyDown}
           toggleTaskCompletion={toggleTaskCompletion}
+          toggleSelectTask={toggleSelectTask} // Pass down the function to handle task selection
+          removeSelectedTasks={removeSelectedTasks} // Pass down the function to remove selected tasks
+          selectAllTasks={selectAllTasks} // Pass down the function to handle select all
+          selectedTasks={selectedTasks} // Pass down the selected tasks state
         />
 
         {/* Bootstrap Toast for Save Notification */}

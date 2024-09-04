@@ -1,6 +1,7 @@
 // src/components/TaskList.js
 
 import React from 'react';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 function TaskList({
   currentList,
@@ -16,7 +17,11 @@ function TaskList({
   saveTask,
   handleKeyDown,
   toggleTaskCompletion,
+  toggleSelectTaskForRemoval,
+  removeSelectedTasks,
+  selectedTasks,
 }) {
+  // Function to determine the style based on priority
   const getPriorityBadge = (priority) => {
     switch (priority) {
       case 'High':
@@ -32,6 +37,15 @@ function TaskList({
 
   return (
     <section id="todo-lists" className="mb-3 text-center">
+      <div className="mb-2 d-flex justify-content-between">
+        <button
+          className="btn btn-danger btn-sm"
+          onClick={removeSelectedTasks}
+          disabled={selectedTasks.length === 0}
+        >
+          Remove Selected
+        </button>
+      </div>
       <ul id="list-container" className="list-group">
         {currentList?.tasks.map(task => (
           <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
@@ -67,6 +81,7 @@ function TaskList({
             ) : (
               <>
                 <div className="d-flex align-items-center">
+                  {/* Checkbox for completion */}
                   <input
                     type="checkbox"
                     className="form-check-input me-2"
@@ -75,10 +90,10 @@ function TaskList({
                   />
                   <span className={task.completed ? 'text-decoration-line-through' : ''}>
                     {task.text}
-                  </span> {/* Task text */}
-                  <span className="ms-2">{getPriorityBadge(task.priority)}</span> {/* Priority badge */}
+                  </span>
+                  <span className="ms-2">{getPriorityBadge(task.priority)}</span>
                   {task.deadline && (
-                    <span className="ms-3 text-muted">Due by: {task.deadline}</span> // Display the due date
+                    <span className="ms-3 text-muted">Due by: {task.deadline}</span>
                   )}
                 </div>
                 <div>
@@ -88,6 +103,17 @@ function TaskList({
                   <button onClick={() => removeTask(task.id)} className="btn btn-danger btn-sm">
                     Remove
                   </button>
+                  {/* Checkbox for selection with tooltip */}
+                  <OverlayTrigger
+                    overlay={<Tooltip id={`tooltip-${task.id}`}>Select for deletion</Tooltip>}
+                  >
+                    <input
+                      type="checkbox"
+                      className="form-check-input ms-2"
+                      checked={selectedTasks.includes(task.id)}
+                      onChange={() => toggleSelectTaskForRemoval(task.id)}
+                    />
+                  </OverlayTrigger>
                 </div>
               </>
             )}

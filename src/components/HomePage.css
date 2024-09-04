@@ -1,11 +1,16 @@
+/* src/components/HomePage.css */
+
 body {
   background-color: white;
   color: black;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  padding-top: 56px;
-  padding-bottom: 56px;
+  padding-top: 56px; /* Space for the fixed navbar */
+  padding-bottom: 56px; /* Space for the fixed footer */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .dark-mode {
@@ -14,12 +19,15 @@ body {
 }
 
 .app-container {
-  padding: 20px;
-  min-height: calc(100vh - 112px);
+  flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
+  overflow-y: auto; /* Allow scrolling for long content */
+  padding: 20px 15px; /* Consistent padding */
+  padding-bottom: 70px; /* Ensure there's enough space for the footer */
 }
 
 .navbar {
@@ -50,9 +58,10 @@ body {
   font-size: 14px;
 }
 
+/* Consistent input group styling */
 .input-group {
-  max-width: 800px;
-  margin: 10px auto;
+  max-width: 600px;
+  margin: 10px auto; /* Uniform margin */
   display: flex;
   align-items: center;
 }
@@ -60,37 +69,31 @@ body {
 .input-group .form-control {
   flex: 2;
   margin-right: 5px;
+  padding: 8px; /* Consistent padding */
+  font-size: 1em; /* Consistent font size */
 }
 
 .input-group .btn {
   flex: 1;
+  padding: 8px 12px; /* Consistent padding */
+  font-size: 1em; /* Consistent font size */
 }
 
+/* Consistent button styling */
 .btn {
   margin: 5px;
-  padding: 8px 12px;
-  font-size: 14px;
-  height: 38px;
+  padding: 8px 15px; /* Slightly increased padding */
+  font-size: 1em; /* Uniform font size */
+  height: 38px; /* Uniform button height */
+  min-width: 80px; /* Added minimum width for better appearance */
 }
 
-.btn-success {
-  background-color: #28a745;
-  border-color: #28a745;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
-.btn-danger {
-  background-color: #dc3545;
-  border-color: #dc3545;
-}
-
+.btn-success,
+.btn-secondary,
+.btn-danger,
 .btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
+  font-size: 1em; /* Consistent font size */
+  min-width: 80px; /* Consistent minimum width */
 }
 
 .btn:hover {
@@ -101,37 +104,41 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  margin-bottom: 5px;
+  padding: 10px; /* Uniform padding */
+  margin-bottom: 8px; /* Uniform margin */
   border: 1px solid #ddd;
   border-radius: 5px;
   width: 100%;
 }
 
 .list-group-item button {
-  margin-left: 10px;
+  margin-left: 5px; /* Consistent margin */
+  padding: 8px 12px; /* Consistent padding */
+  font-size: 1em; /* Consistent font size */
+  min-width: 80px; /* Ensuring buttons have a minimum width */
 }
 
 .text-center {
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 15px; /* Uniform margin */
+  font-size: 1em; /* Consistent font size */
 }
 
 #userGreeting {
-  font-size: 1.2em;
-  margin-bottom: 15px;
+  font-size: 1.1em; /* Slightly larger font size for emphasis */
+  margin-bottom: 15px; /* Consistent margin */
 }
 
 #date-time,
 #greeting,
 #clickcount {
-  font-size: 1.1em;
-  margin-bottom: 10px;
+  font-size: 1em; /* Consistent font size */
+  margin-bottom: 10px; /* Uniform margin */
 }
 
 .countdown {
   margin-top: 10px;
-  font-size: 1.2em;
+  font-size: 1em; /* Consistent font size */
 }
 
 /* Footer styles */
@@ -142,8 +149,9 @@ footer {
   background-color: #f8f9fa;
   padding: 10px 0;
   text-align: center;
+  height: 56px; /* Consistent footer height */
   border-top: none;
-  height: 12%;
+  z-index: 1030;
 }
 
 /* Responsive adjustments */
