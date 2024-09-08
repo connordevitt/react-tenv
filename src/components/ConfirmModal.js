@@ -1,31 +1,38 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './Modal.css';  // Custom styles for the modal
 
-function ConfirmationModal({ message, onConfirm, onCancel }) {
-  // Focus management to bring modal into focus
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        onCancel();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onCancel]);
+const ConfirmModal = ({ task, onClose, onConfirm }) => {
+    if (!task) return null;
 
-  return (
-    <div className="modal-overlay" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalMessage">
-      <div className="modal-content" role="document">
-        <h3 id="modalTitle">Confirmation</h3>
-        <p id="modalMessage">{message}</p>
-        <div className="modal-actions">
-          <button className="confirm-btn" onClick={onConfirm}>Confirm</button>
-          <button className="cancel-btn" onClick={onCancel}>Cancel</button>
-        </div>
-      </div>
-    </div>
-  );
-}
+    return ReactDOM.createPortal(
+        <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+            <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">Confirm Deletion</h5>
+                        <button type="button" className="close" onClick={onClose} aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div className="modal-body">
+                        {/* Display the task text dynamically */}
+                        <p>Are you sure you want to delete the task: <strong>{task.text}</strong>?</p>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-danger" onClick={onConfirm}>
+                            Confirm
+                        </button>
+                        <button type="button" className="btn btn-secondary" onClick={onClose}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
 
-export default ConfirmationModal;
+export default ConfirmModal;

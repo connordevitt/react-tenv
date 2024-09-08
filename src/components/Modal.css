@@ -1,0 +1,69 @@
+/* Modal adjustments */
+.modal-dialog {
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+.modal-header {
+    border-bottom: none;
+    font-size: 1.5rem;
+    padding-bottom: 0; /* To reduce space at the bottom of the header */
+}
+
+.modal-title {
+    font-weight: bold;
+    font-size: 1.7rem;
+    color: #333;
+}
+
+.modal-body {
+    font-size: 1.2rem;
+    color: #555;
+    padding: 20px 30px;
+}
+
+.modal-footer {
+    justify-content: flex-end;
+    padding-top: 0; /* Reduce space at the top of footer */
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    box-shadow: none; /* Remove shadow around buttons */
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    border: none;
+}
+
+.btn-secondary {
+    background-color: #7f8c8d;
+    border: none;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.modal-footer .btn + .btn {
+    margin-left: 10px;
+}
+
+.modal-header .close {
+    font-size: 1.2rem;
+    border: none; /* Remove border around close button */
+    opacity: 0.7; /* Make it softer */
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+/* Subtle box shadow for modal */
+.modal-content {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Soft shadow */
+}

@@ -2,29 +2,29 @@ import React, { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './HomePage.css';
+import ConfirmModal from './ConfirmModal'; // Properly import ConfirmModal
 
 function HomePage() {
   const [lists, setLists] = useState([{ id: 1, title: 'Default List', tasks: [] }]);
   const [currentListId, setCurrentListId] = useState(1);
   const [newListTitle, setNewListTitle] = useState('');
   const [newTask, setNewTask] = useState('');
-  const [taskPriority, setTaskPriority] = useState('Medium'); // Default task priority
+  const [taskPriority, setTaskPriority] = useState('Medium');
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTaskText, setEditedTaskText] = useState('');
+  
+  // Modal state for deleting a task
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   const currentList = lists.find((list) => list.id === currentListId);
 
-  // Helper function to return appropriate priority class
   const getPriorityClass = (priority) => {
     switch (priority) {
-      case 'Low':
-        return 'priority-low'; // Green
-      case 'Medium':
-        return 'priority-medium'; // Yellow
-      case 'High':
-        return 'priority-high'; // Red
-      default:
-        return '';
+      case 'Low': return 'priority-low';
+      case 'Medium': return 'priority-medium';
+      case 'High': return 'priority-high';
+      default: return '';
     }
   };
 
@@ -32,28 +32,37 @@ function HomePage() {
     if (newTask.trim()) {
       const updatedLists = lists.map((list) =>
         list.id === currentListId
-          ? {
-              ...list,
-              tasks: [
-                ...list.tasks,
-                { id: list.tasks.length + 1, text: newTask, priority: taskPriority }, // Add task with priority
-              ],
-            }
+          ? { ...list, tasks: [...list.tasks, { id: list.tasks.length + 1, text: newTask, priority: taskPriority }] }
           : list
       );
       setLists(updatedLists);
       setNewTask('');
-      setTaskPriority('Medium'); // Reset priority after adding task
+      setTaskPriority('Medium');
     }
   };
 
-  const removeTask = (taskId) => {
-    const updatedLists = lists.map((list) =>
-      list.id === currentListId
-        ? { ...list, tasks: list.tasks.filter((task) => task.id !== taskId) }
-        : list
-    );
-    setLists(updatedLists);
+  // Handle "Enter" key press event
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      addTask();  // Trigger addTask when Enter is pressed
+    }
+  };
+
+  const handleDeleteClick = (task) => {
+    setTaskToDelete(task); // Set task to be deleted
+    setShowConfirmModal(true); // Show the confirmation modal
+  };
+
+  const handleTaskDelete = () => {
+    if (taskToDelete) {
+      const updatedLists = lists.map((list) =>
+        list.id === currentListId
+          ? { ...list, tasks: list.tasks.filter((task) => task.id !== taskToDelete.id) }
+          : list
+      );
+      setLists(updatedLists);
+      setShowConfirmModal(false); // Close the modal after deletion
+    }
   };
 
   const addList = () => {
@@ -86,11 +95,7 @@ function HomePage() {
     setLists(updatedLists);
     setEditingTaskId(null);
     setEditedTaskText('');
-
-    toast.success('Task edited successfully!', {
-      position: 'top-right',
-      autoClose: 2000,
-    });
+    toast.success('Task edited successfully!', { position: 'top-right', autoClose: 2000 });
   };
 
   const cancelTaskEdit = () => {
@@ -100,7 +105,6 @@ function HomePage() {
 
   return (
     <div className="app-container">
-      {/* Sidebar */}
       <aside className="sidebar">
         <h2>My Lists</h2>
         <input
@@ -125,17 +129,16 @@ function HomePage() {
         </ul>
       </aside>
 
-      {/* Main content */}
       <main className="main-content">
         <h2 className="list-title">{currentList.title}</h2>
 
-        {/* Task Input and Priority */}
         <div className="add-task-container">
           <input
             type="text"
             placeholder="Add some text!"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
+            onKeyPress={handleKeyPress}  
           />
           <select
             value={taskPriority}
@@ -151,7 +154,6 @@ function HomePage() {
           </button>
         </div>
 
-        {/* Task List */}
         <div className="task-list">
           {currentList.tasks.map((task) => (
             <div className={`task ${getPriorityClass(task.priority)}`} key={task.id}>
@@ -180,7 +182,7 @@ function HomePage() {
                   <button className="edit-btn" onClick={() => startEditingTask(task.id, task.text)}>
                     Edit
                   </button>
-                  <button className="remove-btn" onClick={() => removeTask(task.id)}>
+                  <button className="remove-btn" onClick={() => handleDeleteClick(task)}>
                     Remove
                   </button>
                 </div>
@@ -194,8 +196,16 @@ function HomePage() {
         <p>© 2024 To-Do List App. All rights reserved.</p>
       </footer>
 
-      {/* Toast Notification Container */}
       <ToastContainer />
+
+      {/* Confirm Modal */}
+      {showConfirmModal && (
+        <ConfirmModal
+          task={taskToDelete}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={handleTaskDelete}
+        />
+      )}
     </div>
   );
 }

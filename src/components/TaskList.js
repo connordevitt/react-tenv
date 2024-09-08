@@ -1,66 +1,40 @@
-// src/components/TaskList.js
+import React, { useState } from 'react';
+import ConfirmModal from './ConfirmModal';
 
-import React from 'react';
+const TaskList = ({ tasks, deleteTask }) => {
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [taskToDelete, setTaskToDelete] = useState(null);
 
-function TaskList({
-  currentList,
-  removeTask,
-  startEditingTask,
-  editingTaskId,
-  editedTaskText,
-  setEditedTaskText,
-  editedTaskPriority,
-  setEditedTaskPriority,
-  editedTaskDeadline,
-  setEditedTaskDeadline,
-  saveTask,
-  handleKeyDown,
-  toggleTaskCompletion,
-}) {
-  if (!currentList || !currentList.tasks) {
-    return <p>No tasks available</p>;
-  }
+    const handleDeleteClick = (task) => {
+        setTaskToDelete(task);
+        setShowConfirmModal(true);  // Opens the modal
+    };
 
-  return (
-    <div className="task-list">
-      {currentList.tasks.length === 0 ? (
-        <p>No tasks to display.</p>
-      ) : (
-        currentList.tasks.map((task) => (
-          <div key={task.id} className="task">
-            <div className="task-details">
-              <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={() => toggleTaskCompletion(task.id)}
-              />
-              {editingTaskId === task.id ? (
-                <input
-                  type="text"
-                  value={editedTaskText}
-                  onChange={(e) => setEditedTaskText(e.target.value)}
-                  onKeyDown={handleKeyDown}
+    const handleTaskDelete = () => {
+        if (taskToDelete) {
+            deleteTask(taskToDelete.id);  // Call deleteTask with the task ID
+        }
+        setShowConfirmModal(false);  // Close the modal
+    };
+
+    return (
+        <div>
+            {tasks.map(task => (
+                <div key={task.id} className="task-item">
+                    <span>{task.name}</span>
+                    <button onClick={() => handleDeleteClick(task)}>Delete</button>
+                </div>
+            ))}
+
+            {showConfirmModal && (
+                <ConfirmModal 
+                    task={taskToDelete}
+                    onClose={() => setShowConfirmModal(false)}
+                    onConfirm={handleTaskDelete}
                 />
-              ) : (
-                <span>{task.text}</span>
-              )}
-            </div>
-
-            <div className="task-actions">
-              {editingTaskId === task.id ? (
-                <button onClick={saveTask}>Save</button>
-              ) : (
-                <>
-                  <button onClick={() => startEditingTask(task)}>Edit</button>
-                  <button onClick={() => removeTask(task.id)}>Remove</button>
-                </>
-              )}
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  );
-}
+            )}
+        </div>
+    );
+};
 
 export default TaskList;
