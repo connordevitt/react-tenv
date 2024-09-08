@@ -1,123 +1,64 @@
-// src/components/HomePage.js
-
-import React, { useEffect, useState } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import React, { useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './HomePage.css';
-import Navbar from './Navbar';
-import TaskInput from './TaskInput';
-import TaskList from './TaskList';
-import ListManager from './ListManager';
-import ConfirmModal from './ConfirmModal';
 
 function HomePage() {
-  const [lists, setLists] = useState(() => {
-    const savedLists = localStorage.getItem('todoLists');
-    return savedLists ? JSON.parse(savedLists) : [{ id: 'default', title: 'Default List', tasks: [] }];
-  });
-
-  const [currentListId, setCurrentListId] = useState('default');
-  const [newTask, setNewTask] = useState('');
-  const [taskPriority, setTaskPriority] = useState('Medium');
-  const [taskDeadline, setTaskDeadline] = useState('');
+  const [lists, setLists] = useState([{ id: 1, title: 'Default List', tasks: [] }]);
+  const [currentListId, setCurrentListId] = useState(1);
   const [newListTitle, setNewListTitle] = useState('');
-  const [darkMode, setDarkMode] = useState(false);
-  const [showTimeoutNotification, setShowTimeoutNotification] = useState(false);
+  const [newTask, setNewTask] = useState('');
+  const [taskPriority, setTaskPriority] = useState('Medium'); // Default task priority
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTaskText, setEditedTaskText] = useState('');
-  const [editedTaskPriority, setEditedTaskPriority] = useState('Medium');
-  const [editedTaskDeadline, setEditedTaskDeadline] = useState('');
-  const [showSaveNotification, setShowSaveNotification] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [taskToRemove, setTaskToRemove] = useState(null);
-  const [showRemoveNotification, setShowRemoveNotification] = useState(false);
-  const [selectedTasks, setSelectedTasks] = useState([]); // State for tracking selected tasks
 
-  useEffect(() => {
-    const gtagScript = document.createElement('script');
-    gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-XREYQ41BK6';
-    gtagScript.async = true;
-    document.body.appendChild(gtagScript);
+  const currentList = lists.find((list) => list.id === currentListId);
 
-    const gtagScriptContent = document.createElement('script');
-    gtagScriptContent.innerHTML = `
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XREYQ41BK6');
-    `;
-    document.body.appendChild(gtagScriptContent);
-
-    return () => {
-      document.body.removeChild(gtagScript);
-      document.body.removeChild(gtagScriptContent);
-    };
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('todoLists', JSON.stringify(lists));
-  }, [lists]);
-
-  const addTask = () => {
-    if (newTask.trim() !== '') {
-      const updatedLists = lists.map(list => {
-        if (list.id === currentListId) {
-          return {
-            ...list,
-            tasks: [...list.tasks, { id: Date.now(), text: newTask, priority: taskPriority, deadline: taskDeadline, completed: false }],
-          };
-        }
-        return list;
-      });
-      setLists(updatedLists);
-      setNewTask('');
-      setTaskDeadline('');
+  // Helper function to return appropriate priority class
+  const getPriorityClass = (priority) => {
+    switch (priority) {
+      case 'Low':
+        return 'priority-low'; // Green
+      case 'Medium':
+        return 'priority-medium'; // Yellow
+      case 'High':
+        return 'priority-high'; // Red
+      default:
+        return '';
     }
   };
 
-  const confirmRemoveTask = (taskId) => {
-    setTaskToRemove(taskId);
-    setShowConfirmModal(true);
+  const addTask = () => {
+    if (newTask.trim()) {
+      const updatedLists = lists.map((list) =>
+        list.id === currentListId
+          ? {
+              ...list,
+              tasks: [
+                ...list.tasks,
+                { id: list.tasks.length + 1, text: newTask, priority: taskPriority }, // Add task with priority
+              ],
+            }
+          : list
+      );
+      setLists(updatedLists);
+      setNewTask('');
+      setTaskPriority('Medium'); // Reset priority after adding task
+    }
   };
 
-  const removeTask = () => {
-    const updatedLists = lists.map(list => {
-      if (list.id === currentListId) {
-        return {
-          ...list,
-          tasks: list.tasks.filter(task => task.id !== taskToRemove),
-        };
-      }
-      return list;
-    });
+  const removeTask = (taskId) => {
+    const updatedLists = lists.map((list) =>
+      list.id === currentListId
+        ? { ...list, tasks: list.tasks.filter((task) => task.id !== taskId) }
+        : list
+    );
     setLists(updatedLists);
-    setShowConfirmModal(false);
-    setTaskToRemove(null);
-    setShowRemoveNotification(true);
-
-    setTimeout(() => {
-      setShowRemoveNotification(false);
-    }, 2000);
   };
 
-  const handleCancelRemove = () => {
-    setShowConfirmModal(false);
-    setTaskToRemove(null);
-  };
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
-  const addNewList = () => {
-    if (newListTitle.trim() !== '') {
-      const newList = {
-        id: Date.now().toString(),
-        title: newListTitle,
-        tasks: [],
-      };
-      setLists([...lists, newList]);
-      setCurrentListId(newList.id);
+  const addList = () => {
+    if (newListTitle.trim()) {
+      setLists([...lists, { id: lists.length + 1, title: newListTitle, tasks: [] }]);
       setNewListTitle('');
     }
   };
@@ -126,227 +67,135 @@ function HomePage() {
     setCurrentListId(listId);
   };
 
-  const startEditingTask = (task) => {
-    setEditingTaskId(task.id);
-    setEditedTaskText(task.text);
-    setEditedTaskPriority(task.priority);
-    setEditedTaskDeadline(task.deadline);
+  const startEditingTask = (taskId, currentText) => {
+    setEditingTaskId(taskId);
+    setEditedTaskText(currentText);
   };
 
-  const saveTask = () => {
-    const updatedLists = lists.map(list => {
-      if (list.id === currentListId) {
-        return {
-          ...list,
-          tasks: list.tasks.map(task => {
-            if (task.id === editingTaskId) {
-              return {
-                ...task,
-                text: editedTaskText,
-                priority: editedTaskPriority,
-                deadline: editedTaskDeadline,
-              };
-            }
-            return task;
-          }),
-        };
-      }
-      return list;
-    });
+  const saveTaskEdit = (taskId) => {
+    const updatedLists = lists.map((list) =>
+      list.id === currentListId
+        ? {
+            ...list,
+            tasks: list.tasks.map((task) =>
+              task.id === taskId ? { ...task, text: editedTaskText } : task
+            ),
+          }
+        : list
+    );
     setLists(updatedLists);
     setEditingTaskId(null);
-    setShowSaveNotification(true);
+    setEditedTaskText('');
 
-    setTimeout(() => {
-      setShowSaveNotification(false);
-    }, 2000);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      saveTask();
-    }
-  };
-
-  const toggleTaskCompletion = (taskId) => {
-    const updatedLists = lists.map(list => {
-      if (list.id === currentListId) {
-        return {
-          ...list,
-          tasks: list.tasks.map(task => {
-            if (task.id === taskId) {
-              return { ...task, completed: !task.completed };
-            }
-            return task;
-          }),
-        };
-      }
-      return list;
+    toast.success('Task edited successfully!', {
+      position: 'top-right',
+      autoClose: 2000,
     });
-    setLists(updatedLists);
   };
 
-  const toggleSelectTask = (taskId) => {
-    setSelectedTasks(prevSelected =>
-      prevSelected.includes(taskId)
-        ? prevSelected.filter(id => id !== taskId)
-        : [...prevSelected, taskId]
-    );
+  const cancelTaskEdit = () => {
+    setEditingTaskId(null);
+    setEditedTaskText('');
   };
-
-  const removeSelectedTasks = () => {
-    const updatedLists = lists.map(list => {
-      if (list.id === currentListId) {
-        return {
-          ...list,
-          tasks: list.tasks.filter(task => !selectedTasks.includes(task.id)),
-        };
-      }
-      return list;
-    });
-    setLists(updatedLists);
-    setSelectedTasks([]); // Reset selected tasks
-  };
-
-  const selectAllTasks = (isChecked) => {
-    if (isChecked) {
-      const allTaskIds = currentList?.tasks.map(task => task.id) || [];
-      setSelectedTasks(allTaskIds);
-    } else {
-      setSelectedTasks([]);
-    }
-  };
-
-  const currentList = lists.find(list => list.id === currentListId);
 
   return (
-    <div className={`app-container ${darkMode ? 'dark-mode' : ''}`}>
-      {/* Conditionally render the timeout notification */}
-      {showTimeoutNotification && (
-        <div id="timeout-notification" className="alert alert-danger text-center" role="alert">
-          Session timed out. Welcome, Guest!
+    <div className="app-container">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <h2>My Lists</h2>
+        <input
+          type="text"
+          placeholder="Enter new list name"
+          value={newListTitle}
+          onChange={(e) => setNewListTitle(e.target.value)}
+        />
+        <button className="add-task-btn" onClick={addList}>
+          + Add List
+        </button>
+        <ul className="list-selector">
+          {lists.map((list) => (
+            <li
+              key={list.id}
+              onClick={() => changeList(list.id)}
+              className={list.id === currentListId ? 'active-list' : ''}
+            >
+              {list.title}
+            </li>
+          ))}
+        </ul>
+      </aside>
+
+      {/* Main content */}
+      <main className="main-content">
+        <h2 className="list-title">{currentList.title}</h2>
+
+        {/* Task Input and Priority */}
+        <div className="add-task-container">
+          <input
+            type="text"
+            placeholder="Add some text!"
+            value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+          />
+          <select
+            value={taskPriority}
+            onChange={(e) => setTaskPriority(e.target.value)}
+            className="form-select"
+          >
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+          <button className="add-task-btn" onClick={addTask}>
+            Add
+          </button>
         </div>
-      )}
 
-      <Navbar toggleDarkMode={toggleDarkMode} />
-
-      <div className="container mt-4">
-        <header className="text-center mb-3">
-          <p id="userGreeting" className="lead">Welcome, Guest!</p>
-        </header>
-
-        <div className="text-center mb-4">
-          <h6 id="MasterList" className="h12">{currentList?.title}</h6>
-          <div id="date-time" className="text-center mb-3">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit'
-            })}
-          </div>
-          <div id="greeting" className="text-center mb-3">
-            Afternoon Pioneer! Welcome Aboard.
-          </div>
-          <div id="clickcount" className="text-center mb-3">
-            Completed Task counter: {currentList?.tasks.filter(task => task.completed).length}
-          </div>
-        </div>
-
-        {/* List Manager for Title Input and Dropdown */}
-        <ListManager
-          newListTitle={newListTitle}
-          setNewListTitle={setNewListTitle}
-          addNewList={addNewList}
-          lists={lists}
-          changeList={changeList}
-          currentList={currentList}
-        />
-
-        {/* Task Input Component */}
-        <TaskInput
-          newTask={newTask}
-          setNewTask={setNewTask}
-          taskPriority={taskPriority}
-          setTaskPriority={setTaskPriority}
-          taskDeadline={taskDeadline}
-          setTaskDeadline={setTaskDeadline}
-          addTask={addTask}
-        />
-
-        {/* Task List Component */}
-        <TaskList
-          currentList={currentList}
-          removeTask={confirmRemoveTask}
-          startEditingTask={startEditingTask}
-          editingTaskId={editingTaskId}
-          editedTaskText={editedTaskText}
-          setEditedTaskText={setEditedTaskText}
-          editedTaskPriority={editedTaskPriority}
-          setEditedTaskPriority={setEditedTaskPriority}
-          editedTaskDeadline={editedTaskDeadline}
-          setEditedTaskDeadline={setEditedTaskDeadline}
-          saveTask={saveTask}
-          handleKeyDown={handleKeyDown}
-          toggleTaskCompletion={toggleTaskCompletion}
-          toggleSelectTask={toggleSelectTask} // Pass down the function to handle task selection
-          removeSelectedTasks={removeSelectedTasks} // Pass down the function to remove selected tasks
-          selectAllTasks={selectAllTasks} // Pass down the function to handle select all
-          selectedTasks={selectedTasks} // Pass down the selected tasks state
-        />
-
-        {/* Bootstrap Toast for Save Notification */}
-        {showSaveNotification && (
-          <div className="position-fixed top-0 start-50 translate-middle-x p-3" style={{ zIndex: 1050 }}>
-            <div className="toast align-items-center text-white bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-              <div className="d-flex">
-                <div className="toast-body">
-                  Task saved successfully!
+        {/* Task List */}
+        <div className="task-list">
+          {currentList.tasks.map((task) => (
+            <div className={`task ${getPriorityClass(task.priority)}`} key={task.id}>
+              {editingTaskId === task.id ? (
+                <div className="edit-mode">
+                  <input
+                    type="text"
+                    value={editedTaskText}
+                    onChange={(e) => setEditedTaskText(e.target.value)}
+                  />
+                  <button className="save-btn" onClick={() => saveTaskEdit(task.id)}>
+                    Save
+                  </button>
+                  <button className="cancel-btn" onClick={cancelTaskEdit}>
+                    Cancel
+                  </button>
                 </div>
-                <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Bootstrap Toast for Remove Notification */}
-        {showRemoveNotification && (
-          <div className="position-fixed top-0 start-50 translate-middle-x p-3" style={{ zIndex: 1050 }}>
-            <div className="toast align-items-center text-white bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-              <div className="d-flex">
-                <div className="toast-body">
-                  Task removed successfully!
+              ) : (
+                <div className="task-details">
+                  <span className="task-priority">{task.priority}</span>
+                  <span>{task.text}</span>
                 </div>
-                <button type="button" className="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
+              )}
+              {editingTaskId !== task.id && (
+                <div className="task-actions">
+                  <button className="edit-btn" onClick={() => startEditingTask(task.id, task.text)}>
+                    Edit
+                  </button>
+                  <button className="remove-btn" onClick={() => removeTask(task.id)}>
+                    Remove
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
-        )}
-
-        {/* Confirmation Modal for Task Removal */}
-        <ConfirmModal
-          show={showConfirmModal}
-          handleClose={handleCancelRemove}
-          handleConfirm={removeTask}
-          taskText={taskToRemove ? currentList?.tasks.find(task => task.id === taskToRemove)?.text : ''}
-        />
-
-      </div>
-
-      <footer className="text-center">
-        <p>&copy; 2024 To-Do List App. All rights reserved.</p>
-        <div className="mt-2">
-          <h6>Countdown to September 24th!</h6>
-          <div id="countdown" className="countdown">
-            <span id="days">23</span> days, <span id="hours">11</span> hours,
-            <span id="minutes">34</span> minutes,
-            <span id="seconds">32</span> seconds
-          </div>
+          ))}
         </div>
+      </main>
+
+      <footer>
+        <p>© 2024 To-Do List App. All rights reserved.</p>
       </footer>
+
+      {/* Toast Notification Container */}
+      <ToastContainer />
     </div>
   );
 }

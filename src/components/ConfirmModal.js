@@ -1,28 +1,31 @@
-// src/components/ConfirmModal.js
+import React, { useEffect } from 'react';
 
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+function ConfirmationModal({ message, onConfirm, onCancel }) {
+  // Focus management to bring modal into focus
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onCancel]);
 
-function ConfirmModal({ show, handleClose, handleConfirm, taskText }) {
   return (
-    <div className={`modal fade ${show ? 'show' : ''}`} style={{ display: show ? 'block' : 'none' }} tabIndex="-1" role="dialog">
-      <div className="modal-dialog" role="document">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h5 className="modal-title">Confirm Task Removal</h5>
-            <button type="button" className="btn-close" onClick={handleClose} aria-label="Close"></button>
-          </div>
-          <div className="modal-body">
-            <p>Are you sure you want to remove the task: "{taskText}"?</p>
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={handleClose}>Cancel</button>
-            <button type="button" className="btn btn-danger" onClick={handleConfirm}>Remove</button>
-          </div>
+    <div className="modal-overlay" role="dialog" aria-labelledby="modalTitle" aria-describedby="modalMessage">
+      <div className="modal-content" role="document">
+        <h3 id="modalTitle">Confirmation</h3>
+        <p id="modalMessage">{message}</p>
+        <div className="modal-actions">
+          <button className="confirm-btn" onClick={onConfirm}>Confirm</button>
+          <button className="cancel-btn" onClick={onCancel}>Cancel</button>
         </div>
       </div>
     </div>
   );
 }
 
-export default ConfirmModal;
+export default ConfirmationModal;
