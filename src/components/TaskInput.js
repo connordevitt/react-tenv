@@ -28,7 +28,7 @@ function TaskInput({
           placeholder="Add some text!"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
-          onKeyDown={handleKeyDown} // Add this line to listen for Enter key
+          onKeyDown={handleKeyDown} 
         />
         <select
           id="taskPriority"
@@ -46,7 +46,7 @@ function TaskInput({
           className="form-control"
           value={taskDeadline}
           onChange={(e) => setTaskDeadline(e.target.value)}
-          onKeyDown={handleKeyDown} // Ensure this line is here for the deadline input as well
+          onKeyDown={handleKeyDown} 
         />
         <button
           id="add-task-button"

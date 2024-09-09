@@ -7,14 +7,14 @@ const TaskList = ({ tasks, deleteTask }) => {
 
     const handleDeleteClick = (task) => {
         setTaskToDelete(task);
-        setShowConfirmModal(true);  // Opens the modal
+        setShowConfirmModal(true);  
     };
 
     const handleTaskDelete = () => {
         if (taskToDelete) {
-            deleteTask(taskToDelete.id);  // Call deleteTask with the task ID
+            deleteTask(taskToDelete.id);  
         }
-        setShowConfirmModal(false);  // Close the modal
+        setShowConfirmModal(false);  
     };
 
     return (

@@ -1,23 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './HomePage.css';
-import ConfirmModal from './ConfirmModal'; // Properly import ConfirmModal
+import ConfirmModal from './ConfirmModal';
+import Countdown from './Countdown';
+import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage'; // Import LocalStorage helpers
 
 function HomePage() {
-  const [lists, setLists] = useState([{ id: 1, title: 'Default List', tasks: [] }]);
+  const [lists, setLists] = useState(() => {
+    const savedLists = loadFromLocalStorage('lists');
+    return savedLists || [{ id: 1, title: 'Default List', tasks: [] }];
+  });
+
   const [currentListId, setCurrentListId] = useState(1);
   const [newListTitle, setNewListTitle] = useState('');
   const [newTask, setNewTask] = useState('');
   const [taskPriority, setTaskPriority] = useState('Medium');
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTaskText, setEditedTaskText] = useState('');
-  
-  // Modal state for deleting a task
+  const [editedTaskPriority, setEditedTaskPriority] = useState('Medium'); // Added to store priority change during edit
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
   const currentList = lists.find((list) => list.id === currentListId);
+
+  useEffect(() => {
+    saveToLocalStorage('lists', lists);
+  }, [lists]);
 
   const getPriorityClass = (priority) => {
     switch (priority) {
@@ -41,16 +50,15 @@ function HomePage() {
     }
   };
 
-  // Handle "Enter" key press event
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      addTask();  // Trigger addTask when Enter is pressed
+      addTask();
     }
   };
 
   const handleDeleteClick = (task) => {
-    setTaskToDelete(task); // Set task to be deleted
-    setShowConfirmModal(true); // Show the confirmation modal
+    setTaskToDelete(task);
+    setShowConfirmModal(true);
   };
 
   const handleTaskDelete = () => {
@@ -61,7 +69,7 @@ function HomePage() {
           : list
       );
       setLists(updatedLists);
-      setShowConfirmModal(false); // Close the modal after deletion
+      setShowConfirmModal(false);
     }
   };
 
@@ -76,9 +84,10 @@ function HomePage() {
     setCurrentListId(listId);
   };
 
-  const startEditingTask = (taskId, currentText) => {
+  const startEditingTask = (taskId, currentText, currentPriority) => {
     setEditingTaskId(taskId);
     setEditedTaskText(currentText);
+    setEditedTaskPriority(currentPriority); // Set the priority of the task being edited
   };
 
   const saveTaskEdit = (taskId) => {
@@ -87,7 +96,9 @@ function HomePage() {
         ? {
             ...list,
             tasks: list.tasks.map((task) =>
-              task.id === taskId ? { ...task, text: editedTaskText } : task
+              task.id === taskId
+                ? { ...task, text: editedTaskText, priority: editedTaskPriority } // Save the new priority
+                : task
             ),
           }
         : list
@@ -95,12 +106,14 @@ function HomePage() {
     setLists(updatedLists);
     setEditingTaskId(null);
     setEditedTaskText('');
+    setEditedTaskPriority('Medium'); // Reset after saving
     toast.success('Task edited successfully!', { position: 'top-right', autoClose: 2000 });
   };
 
   const cancelTaskEdit = () => {
     setEditingTaskId(null);
     setEditedTaskText('');
+    setEditedTaskPriority('Medium'); // Reset priority if canceling edit
   };
 
   return (
@@ -135,10 +148,10 @@ function HomePage() {
         <div className="add-task-container">
           <input
             type="text"
-            placeholder="Add some text!"
+            placeholder="Add a task"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
-            onKeyPress={handleKeyPress}  
+            onKeyPress={handleKeyPress}
           />
           <select
             value={taskPriority}
@@ -164,6 +177,15 @@ function HomePage() {
                     value={editedTaskText}
                     onChange={(e) => setEditedTaskText(e.target.value)}
                   />
+                  <select
+                    value={editedTaskPriority}
+                    onChange={(e) => setEditedTaskPriority(e.target.value)} // Allow editing priority
+                    className="form-select"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
                   <button className="save-btn" onClick={() => saveTaskEdit(task.id)}>
                     Save
                   </button>
@@ -179,7 +201,10 @@ function HomePage() {
               )}
               {editingTaskId !== task.id && (
                 <div className="task-actions">
-                  <button className="edit-btn" onClick={() => startEditingTask(task.id, task.text)}>
+                  <button
+                    className="edit-btn"
+                    onClick={() => startEditingTask(task.id, task.text, task.priority)}
+                  >
                     Edit
                   </button>
                   <button className="remove-btn" onClick={() => handleDeleteClick(task)}>
@@ -190,6 +215,11 @@ function HomePage() {
             </div>
           ))}
         </div>
+
+        {/* Countdown Timer */}
+        <div className="countdown-section">
+          <Countdown />
+        </div>
       </main>
 
       <footer>
@@ -198,7 +228,6 @@ function HomePage() {
 
       <ToastContainer />
 
-      {/* Confirm Modal */}
       {showConfirmModal && (
         <ConfirmModal
           task={taskToDelete}

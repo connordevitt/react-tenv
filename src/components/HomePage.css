@@ -209,7 +209,6 @@ footer {
   color: white;
 }
 
-
 /* Task container styling */
 .task-list {
   margin-top: 20px;
@@ -236,4 +235,24 @@ footer {
 
 .form-select {
   padding: 6px;
+}
+/* Low Priority (Blue) */
+.priority-low .task-priority {
+  color: blue;
+  border-left: 5px solid blue;
+  background-color: #e0f7fa; /* Light blue background */
+}
+
+/* Medium Priority (Yellow) */
+.priority-medium .task-priority {
+  color: #d4a017;
+  border-left: 5px solid yellow;
+  background-color: #fffde7; /* Light yellow background */
+}
+
+/* High Priority (Red) */
+.priority-high .task-priority {
+  color: red;
+  border-left: 5px solid red;
+  background-color: #ffebee; /* Light red background */
 }

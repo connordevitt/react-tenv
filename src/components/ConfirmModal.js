@@ -17,7 +17,6 @@ const ConfirmModal = ({ task, onClose, onConfirm }) => {
                         </button>
                     </div>
                     <div className="modal-body">
-                        {/* Display the task text dynamically */}
                         <p>Are you sure you want to delete the task: <strong>{task.text}</strong>?</p>
                     </div>
                     <div className="modal-footer">
