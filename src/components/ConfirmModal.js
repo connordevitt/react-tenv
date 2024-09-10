@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './Modal.css';  // Custom styles for the modal
+import './Modal.css';  
 
 const ConfirmModal = ({ task, onClose, onConfirm }) => {
     if (!task) return null;

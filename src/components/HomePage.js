@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './HomePage.css';
 import ConfirmModal from './ConfirmModal';
 import Countdown from './Countdown';
-import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage'; // Import LocalStorage helpers
+import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage'; // LocalStorage helpers
 
 function HomePage() {
   const [lists, setLists] = useState(() => {
@@ -18,7 +18,7 @@ function HomePage() {
   const [taskPriority, setTaskPriority] = useState('Medium');
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editedTaskText, setEditedTaskText] = useState('');
-  const [editedTaskPriority, setEditedTaskPriority] = useState('Medium'); // Added to store priority change during edit
+  const [editedTaskPriority, setEditedTaskPriority] = useState('Medium');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
@@ -41,7 +41,13 @@ function HomePage() {
     if (newTask.trim()) {
       const updatedLists = lists.map((list) =>
         list.id === currentListId
-          ? { ...list, tasks: [...list.tasks, { id: list.tasks.length + 1, text: newTask, priority: taskPriority }] }
+          ? { 
+              ...list, 
+              tasks: [
+                ...list.tasks, 
+                { id: list.tasks.length + 1, text: newTask, priority: taskPriority, completed: false } // Added 'completed'
+              ] 
+            }
           : list
       );
       setLists(updatedLists);
@@ -87,7 +93,7 @@ function HomePage() {
   const startEditingTask = (taskId, currentText, currentPriority) => {
     setEditingTaskId(taskId);
     setEditedTaskText(currentText);
-    setEditedTaskPriority(currentPriority); // Set the priority of the task being edited
+    setEditedTaskPriority(currentPriority);
   };
 
   const saveTaskEdit = (taskId) => {
@@ -97,7 +103,7 @@ function HomePage() {
             ...list,
             tasks: list.tasks.map((task) =>
               task.id === taskId
-                ? { ...task, text: editedTaskText, priority: editedTaskPriority } // Save the new priority
+                ? { ...task, text: editedTaskText, priority: editedTaskPriority } // Save priority and text
                 : task
             ),
           }
@@ -106,14 +112,34 @@ function HomePage() {
     setLists(updatedLists);
     setEditingTaskId(null);
     setEditedTaskText('');
-    setEditedTaskPriority('Medium'); // Reset after saving
+    setEditedTaskPriority('Medium');
     toast.success('Task edited successfully!', { position: 'top-right', autoClose: 2000 });
   };
 
   const cancelTaskEdit = () => {
     setEditingTaskId(null);
     setEditedTaskText('');
-    setEditedTaskPriority('Medium'); // Reset priority if canceling edit
+    setEditedTaskPriority('Medium');
+  };
+
+  // Mark a task as completed
+  const toggleTaskCompletion = (taskId) => {
+    const updatedLists = lists.map((list) =>
+      list.id === currentListId
+        ? {
+            ...list,
+            tasks: list.tasks.map((task) =>
+              task.id === taskId ? { ...task, completed: !task.completed } : task
+            ),
+          }
+        : list
+    );
+    setLists(updatedLists);
+  };
+
+  const countCompletedTasks = () => {
+    const currentTasks = currentList.tasks || [];
+    return currentTasks.filter(task => task.completed).length;
   };
 
   return (
@@ -169,42 +195,19 @@ function HomePage() {
 
         <div className="task-list">
           {currentList.tasks.map((task) => (
-            <div className={`task ${getPriorityClass(task.priority)}`} key={task.id}>
-              {editingTaskId === task.id ? (
-                <div className="edit-mode">
-                  <input
-                    type="text"
-                    value={editedTaskText}
-                    onChange={(e) => setEditedTaskText(e.target.value)}
-                  />
-                  <select
-                    value={editedTaskPriority}
-                    onChange={(e) => setEditedTaskPriority(e.target.value)} // Allow editing priority
-                    className="form-select"
-                  >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
-                  <button className="save-btn" onClick={() => saveTaskEdit(task.id)}>
-                    Save
-                  </button>
-                  <button className="cancel-btn" onClick={cancelTaskEdit}>
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <div className="task-details">
-                  <span className="task-priority">{task.priority}</span>
-                  <span>{task.text}</span>
-                </div>
-              )}
+            <div className={`task ${getPriorityClass(task.priority)} ${task.completed ? 'completed' : ''}`} key={task.id}>
+              <div className="task-details">
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => toggleTaskCompletion(task.id)}
+                />
+                <span className="task-priority">{task.priority}</span>
+                <span className={task.completed ? 'task-text completed-task' : ''}>{task.text}</span>
+              </div>
               {editingTaskId !== task.id && (
                 <div className="task-actions">
-                  <button
-                    className="edit-btn"
-                    onClick={() => startEditingTask(task.id, task.text, task.priority)}
-                  >
+                  <button className="edit-btn" onClick={() => startEditingTask(task.id, task.text, task.priority)}>
                     Edit
                   </button>
                   <button className="remove-btn" onClick={() => handleDeleteClick(task)}>
@@ -215,6 +218,19 @@ function HomePage() {
             </div>
           ))}
         </div>
+
+       <div className="progress" style={{ height: "25px" }}>
+         <div
+           className="progress-bar bg-success"
+           role="progressbar"
+           style={{ width: `${(countCompletedTasks() / currentList.tasks.length) * 100}%` }}
+           aria-valuenow={countCompletedTasks()}
+           aria-valuemin="0"
+           aria-valuemax={currentList.tasks.length}
+       >
+        {countCompletedTasks()} / {currentList.tasks.length} tasks completed
+       </div>
+       </div>
 
         {/* Countdown Timer */}
         <div className="countdown-section">
