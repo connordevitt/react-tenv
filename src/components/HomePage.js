@@ -4,7 +4,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './HomePage.css';
 import ConfirmModal from './ConfirmModal';
 import Countdown from './Countdown';
-import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage'; // LocalStorage helpers
+import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage';
 
 function HomePage() {
   const [lists, setLists] = useState(() => {
@@ -45,7 +45,7 @@ function HomePage() {
               ...list, 
               tasks: [
                 ...list.tasks, 
-                { id: list.tasks.length + 1, text: newTask, priority: taskPriority, completed: false } // Added 'completed'
+                { id: list.tasks.length + 1, text: newTask, priority: taskPriority, completed: false }
               ] 
             }
           : list
@@ -103,7 +103,7 @@ function HomePage() {
             ...list,
             tasks: list.tasks.map((task) =>
               task.id === taskId
-                ? { ...task, text: editedTaskText, priority: editedTaskPriority } // Save priority and text
+                ? { ...task, text: editedTaskText, priority: editedTaskPriority }
                 : task
             ),
           }
@@ -122,7 +122,6 @@ function HomePage() {
     setEditedTaskPriority('Medium');
   };
 
-  // Mark a task as completed
   const toggleTaskCompletion = (taskId) => {
     const updatedLists = lists.map((list) =>
       list.id === currentListId
@@ -196,18 +195,46 @@ function HomePage() {
         <div className="task-list">
           {currentList.tasks.map((task) => (
             <div className={`task ${getPriorityClass(task.priority)} ${task.completed ? 'completed' : ''}`} key={task.id}>
-              <div className="task-details">
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={() => toggleTaskCompletion(task.id)}
-                />
-                <span className="task-priority">{task.priority}</span>
-                <span className={task.completed ? 'task-text completed-task' : ''}>{task.text}</span>
-              </div>
+              {editingTaskId === task.id ? (
+                <div className="edit-mode">
+                  <input
+                    type="text"
+                    value={editedTaskText}
+                    onChange={(e) => setEditedTaskText(e.target.value)}
+                  />
+                  <select
+                    value={editedTaskPriority}
+                    onChange={(e) => setEditedTaskPriority(e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                  <button className="save-btn" onClick={() => saveTaskEdit(task.id)}>
+                    Save
+                  </button>
+                  <button className="cancel-btn" onClick={cancelTaskEdit}>
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="task-details">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => toggleTaskCompletion(task.id)}
+                  />
+                  <span className="task-priority">{task.priority}</span>
+                  <span className={task.completed ? 'task-text completed-task' : ''}>{task.text}</span>
+                </div>
+              )}
               {editingTaskId !== task.id && (
                 <div className="task-actions">
-                  <button className="edit-btn" onClick={() => startEditingTask(task.id, task.text, task.priority)}>
+                  <button
+                    className="edit-btn"
+                    onClick={() => startEditingTask(task.id, task.text, task.priority)}
+                  >
                     Edit
                   </button>
                   <button className="remove-btn" onClick={() => handleDeleteClick(task)}>
@@ -219,7 +246,7 @@ function HomePage() {
           ))}
         </div>
 
-       <div className="progress" style={{ height: "25px" }}>
+        <div className="progress" style={{ height: "25px" }}>
          <div
            className="progress-bar bg-success"
            role="progressbar"
@@ -231,8 +258,6 @@ function HomePage() {
         {countCompletedTasks()} / {currentList.tasks.length} tasks completed
        </div>
        </div>
-
-        {/* Countdown Timer */}
         <div className="countdown-section">
           <Countdown />
         </div>
@@ -243,7 +268,7 @@ function HomePage() {
       </footer>
 
       <ToastContainer />
-
+      
       {showConfirmModal && (
         <ConfirmModal
           task={taskToDelete}
