@@ -1,9 +1,9 @@
 // src/components/Countdown.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 const Countdown = () => {
   const calculateTimeLeft = () => {
-    const targetDate = new Date('September 24, 2024 00:00:00'); // Set the target date and time
+    const targetDate = new Date("September 24, 2024 00:00:00"); // Set the target date and time
     const now = new Date();
     const difference = targetDate - now;
 
@@ -41,7 +41,7 @@ const Countdown = () => {
     timerComponents.push(
       <span key={interval}>
         {timeLeft[interval]} {interval}{" "}
-      </span>
+      </span>,
     );
   });
 

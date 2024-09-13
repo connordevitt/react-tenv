@@ -1,11 +1,18 @@
 // src/components/ListManager.js
 
-import React from 'react';
+import React from "react";
 
-function ListManager({ newListTitle, setNewListTitle, addNewList, lists, changeList, currentList }) {
+function ListManager({
+  newListTitle,
+  setNewListTitle,
+  addNewList,
+  lists,
+  changeList,
+  currentList,
+}) {
   return (
     <div className="text-center mb-3">
-      <div className="input-group mb-3 mx-auto" style={{ maxWidth: '600px' }}>
+      <div className="input-group mb-3 mx-auto" style={{ maxWidth: "600px" }}>
         <input
           type="text"
           className="form-control"
@@ -13,11 +20,7 @@ function ListManager({ newListTitle, setNewListTitle, addNewList, lists, changeL
           value={newListTitle}
           onChange={(e) => setNewListTitle(e.target.value)}
         />
-        <button
-          className="btn btn-success"
-          type="button"
-          onClick={addNewList}
-        >
+        <button className="btn btn-success" type="button" onClick={addNewList}>
           + Add List
         </button>
 
@@ -27,12 +30,12 @@ function ListManager({ newListTitle, setNewListTitle, addNewList, lists, changeL
           id="listDropdownButton"
           data-bs-toggle="dropdown"
           aria-expanded="false"
-          style={{ marginLeft: '5px' }} 
+          style={{ marginLeft: "5px" }}
         >
-          {currentList?.title || 'Select List'}
+          {currentList?.title || "Select List"}
         </button>
         <ul className="dropdown-menu" aria-labelledby="listDropdownButton">
-          {lists.map(list => (
+          {lists.map((list) => (
             <li key={list.id}>
               <button
                 className="dropdown-item"

@@ -1,46 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid'; 
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './HomePage.css';
-import ConfirmModal from './ConfirmModal';
-import Countdown from './Countdown';
-import { loadFromLocalStorage, saveToLocalStorage } from '../utils/storage';
+import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./HomePage.css";
+import ConfirmModal from "./ConfirmModal";
+import Countdown from "./Countdown";
+import { loadFromLocalStorage, saveToLocalStorage } from "../utils/storage";
 
 function HomePage() {
   const [lists, setLists] = useState(() => {
-    const savedLists = loadFromLocalStorage('lists');
-    return savedLists || [{ id: 1, title: 'Main List', tasks: [] }];
+    const savedLists = loadFromLocalStorage("lists");
+    return savedLists || [{ id: 1, title: "Main List", tasks: [] }];
   });
 
   const [currentListId, setCurrentListId] = useState(1);
-  const [newListTitle, setNewListTitle] = useState('');
-  const [newTask, setNewTask] = useState('');
-  const [taskPriority, setTaskPriority] = useState('Medium');
+  const [newListTitle, setNewListTitle] = useState("");
+  const [newTask, setNewTask] = useState("");
+  const [taskPriority, setTaskPriority] = useState("Medium");
   const [editingTaskId, setEditingTaskId] = useState(null);
-  const [editedTaskText, setEditedTaskText] = useState('');
-  const [editedTaskPriority, setEditedTaskPriority] = useState('Medium');
+  const [editedTaskText, setEditedTaskText] = useState("");
+  const [editedTaskPriority, setEditedTaskPriority] = useState("Medium");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [showRemoveAllConfirmModal, setShowRemoveAllConfirmModal] = useState(false);
+  const [showRemoveAllConfirmModal, setShowRemoveAllConfirmModal] =
+    useState(false);
 
   const currentList = lists.find((list) => list.id === currentListId);
 
   // Save lists to local storage whenever lists are updated
   useEffect(() => {
-    saveToLocalStorage('lists', lists);
+    saveToLocalStorage("lists", lists);
   }, [lists]);
 
   const getPriorityClass = (priority) => {
     switch (priority) {
-      case 'Low':
-        return 'priority-low';
-      case 'Medium':
-        return 'priority-medium';
-      case 'High':
-        return 'priority-high';
+      case "Low":
+        return "priority-low";
+      case "Medium":
+        return "priority-medium";
+      case "High":
+        return "priority-high";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -52,20 +53,25 @@ function HomePage() {
               ...list,
               tasks: [
                 ...list.tasks,
-                { id: uuidv4(), text: newTask, priority: taskPriority, completed: false }
-              ]
+                {
+                  id: uuidv4(),
+                  text: newTask,
+                  priority: taskPriority,
+                  completed: false,
+                },
+              ],
             }
-          : list
+          : list,
       );
       setLists(updatedLists);
-      setNewTask('');
-      setTaskPriority('Medium');
+      setNewTask("");
+      setTaskPriority("Medium");
     }
   };
 
   // Handle "Enter" key press to add a task
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       addTask();
     }
   };
@@ -81,8 +87,11 @@ function HomePage() {
     if (taskToDelete) {
       const updatedLists = lists.map((list) =>
         list.id === currentListId
-          ? { ...list, tasks: list.tasks.filter((task) => task.id !== taskToDelete.id) }
-          : list
+          ? {
+              ...list,
+              tasks: list.tasks.filter((task) => task.id !== taskToDelete.id),
+            }
+          : list,
       );
       setLists(updatedLists);
       setShowConfirmModal(false);
@@ -93,7 +102,7 @@ function HomePage() {
   const addList = () => {
     if (newListTitle.trim()) {
       setLists([...lists, { id: uuidv4(), title: newListTitle, tasks: [] }]);
-      setNewListTitle('');
+      setNewListTitle("");
     }
   };
 
@@ -117,24 +126,31 @@ function HomePage() {
             ...list,
             tasks: list.tasks.map((task) =>
               task.id === taskId
-                ? { ...task, text: editedTaskText, priority: editedTaskPriority }
-                : task
-            )
+                ? {
+                    ...task,
+                    text: editedTaskText,
+                    priority: editedTaskPriority,
+                  }
+                : task,
+            ),
           }
-        : list
+        : list,
     );
     setLists(updatedLists);
     setEditingTaskId(null);
-    setEditedTaskText('');
-    setEditedTaskPriority('Medium');
-    toast.success('Task edited successfully!', { position: 'top-right', autoClose: 2000 });
+    setEditedTaskText("");
+    setEditedTaskPriority("Medium");
+    toast.success("Task edited successfully!", {
+      position: "top-right",
+      autoClose: 2000,
+    });
   };
 
   // Cancel task editing
   const cancelTaskEdit = () => {
     setEditingTaskId(null);
-    setEditedTaskText('');
-    setEditedTaskPriority('Medium');
+    setEditedTaskText("");
+    setEditedTaskPriority("Medium");
   };
 
   // Toggle task completion
@@ -144,26 +160,31 @@ function HomePage() {
         ? {
             ...list,
             tasks: list.tasks.map((task) =>
-              task.id === taskId ? { ...task, completed: !task.completed } : task
-            )
+              task.id === taskId
+                ? { ...task, completed: !task.completed }
+                : task,
+            ),
           }
-        : list
+        : list,
     );
     setLists(updatedLists);
   };
 
   // Remove all tasks from the current list
   // Remove all tasks from the current list
-const removeAllTasks = () => {
-  const updatedLists = lists.map((list) =>
-    list.id === currentListId ? { ...list, tasks: [] } : list
-  );
-  setLists(updatedLists);
-  setShowRemoveAllConfirmModal(false); // Close the modal after removing
+  const removeAllTasks = () => {
+    const updatedLists = lists.map((list) =>
+      list.id === currentListId ? { ...list, tasks: [] } : list,
+    );
+    setLists(updatedLists);
+    setShowRemoveAllConfirmModal(false); // Close the modal after removing
 
-  // Show success toast notification
-  toast.success("All tasks removed successfully!", { position: "top-right", autoClose: 2000 });
-};
+    // Show success toast notification
+    toast.success("All tasks removed successfully!", {
+      position: "top-right",
+      autoClose: 2000,
+    });
+  };
 
   // Count the number of completed tasks
   const countCompletedTasks = () => {
@@ -171,7 +192,6 @@ const removeAllTasks = () => {
     return currentTasks.filter((task) => task.completed).length;
   };
 
-  // Calculate progress based on completed tasks
   const progressPercentage = currentList.tasks.length
     ? (countCompletedTasks() / currentList.tasks.length) * 100
     : 0;
@@ -195,7 +215,7 @@ const removeAllTasks = () => {
             <li
               key={list.id}
               onClick={() => changeList(list.id)}
-              className={list.id === currentListId ? 'active-list' : ''}
+              className={list.id === currentListId ? "active-list" : ""}
             >
               {list.title}
             </li>
@@ -234,53 +254,67 @@ const removeAllTasks = () => {
         <div className="task-list">
           {currentList.tasks.map((task) => (
             <div
-              className={`task ${getPriorityClass(task.priority)} ${task.completed ? 'completed' : ''}`}
+              className={`task ${getPriorityClass(task.priority)} ${task.completed ? "completed" : ""}`}
               key={task.id}
             >
               {editingTaskId === task.id ? (
-  <div className="edit-mode">
-    <input
-      type="text"
-      value={editedTaskText}
-      onChange={(e) => setEditedTaskText(e.target.value)}
-    />
-    <select
-      value={editedTaskPriority}
-      onChange={(e) => setEditedTaskPriority(e.target.value)}
-      className="form-select"
-    >
-      <option value="Low">Low</option>
-      <option value="Medium">Medium</option>
-      <option value="High">High</option>
-    </select>
-    <button className="save-btn" onClick={() => saveTaskEdit(task.id)}>
-      Save
-    </button>
-    <button className="cancel-btn" onClick={cancelTaskEdit}>
-      Cancel
-    </button>
-  </div>
-) : (
-  <div className="task-details">
-    <input
-      type="checkbox"
-      checked={task.completed}
-      onChange={() => toggleTaskCompletion(task.id)}
-    />
-    <span className="task-priority">{task.priority}</span> {/* Priority Badge */}
-    <span className={task.completed ? 'task-text completed-task' : ''}>{task.text}</span> {/* Task Text */}
-  </div>
-)}
-              
+                <div className="edit-mode">
+                  <input
+                    type="text"
+                    value={editedTaskText}
+                    onChange={(e) => setEditedTaskText(e.target.value)}
+                  />
+                  <select
+                    value={editedTaskPriority}
+                    onChange={(e) => setEditedTaskPriority(e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                  <button
+                    className="save-btn"
+                    onClick={() => saveTaskEdit(task.id)}
+                  >
+                    Save
+                  </button>
+                  <button className="cancel-btn" onClick={cancelTaskEdit}>
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="task-details">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => toggleTaskCompletion(task.id)}
+                  />
+                  <span className="task-priority">{task.priority}</span>{" "}
+                  {/* Priority Badge */}
+                  <span
+                    className={task.completed ? "task-text completed-task" : ""}
+                  >
+                    {task.text}
+                  </span>{" "}
+                  {/* Task Text */}
+                </div>
+              )}
+
               {editingTaskId !== task.id && (
                 <div className="task-actions">
                   <button
                     className="edit-btn"
-                    onClick={() => startEditingTask(task.id, task.text, task.priority)}
+                    onClick={() =>
+                      startEditingTask(task.id, task.text, task.priority)
+                    }
                   >
                     Edit
                   </button>
-                  <button className="remove-btn" onClick={() => handleDeleteClick(task)}>
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleDeleteClick(task)}
+                  >
                     Remove
                   </button>
                 </div>
@@ -291,30 +325,30 @@ const removeAllTasks = () => {
 
         {/* Remove All Button */}
         <button
-  className="remove-all-btn"
-  onClick={() => {
-    setShowRemoveAllConfirmModal(true);
-  }}
->
-  Remove All Tasks
-</button>
+          className="remove-all-btn"
+          onClick={() => {
+            setShowRemoveAllConfirmModal(true);
+          }}
+        >
+          Remove All Tasks
+        </button>
 
-{showRemoveAllConfirmModal && (
-  <ConfirmModal
-    task={null} // No specific task for this action
-    onClose={() => setShowRemoveAllConfirmModal(false)}
-    onConfirm={removeAllTasks}
-    message="Are you sure you want to remove all tasks from this list?"
-  />
-)}
+        {showRemoveAllConfirmModal && (
+          <ConfirmModal
+            task={null} // No specific task for this action
+            onClose={() => setShowRemoveAllConfirmModal(false)}
+            onConfirm={removeAllTasks}
+            message="Are you sure you want to remove all tasks from this list?"
+          />
+        )}
 
         {/* Progress Bar */}
-        <div className="progress" style={{ height: '25px' }}>
+        <div className="progress" style={{ height: "25px" }}>
           <div
             className="progress-bar bg-success"
             role="progressbar"
             style={{
-              width: `${progressPercentage}%`
+              width: `${progressPercentage}%`,
             }}
             aria-valuenow={countCompletedTasks()}
             aria-valuemin="0"

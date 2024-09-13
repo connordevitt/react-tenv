@@ -1,6 +1,6 @@
 // src/components/TaskInput.js
 
-import React from 'react';
+import React from "react";
 
 function TaskInput({
   newTask,
@@ -12,7 +12,7 @@ function TaskInput({
   addTask,
 }) {
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault(); // Prevent form submission or page reload
       addTask();
     }
@@ -20,7 +20,7 @@ function TaskInput({
 
   return (
     <section id="todo-input" className="mb-3 text-center">
-      <div className="input-group mb-2 mx-auto" style={{ maxWidth: '800px' }}>
+      <div className="input-group mb-2 mx-auto" style={{ maxWidth: "800px" }}>
         <input
           type="text"
           id="input-box"
@@ -28,7 +28,7 @@ function TaskInput({
           placeholder="Add some text!"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
-          onKeyDown={handleKeyDown} 
+          onKeyDown={handleKeyDown}
         />
         <select
           id="taskPriority"
@@ -46,7 +46,7 @@ function TaskInput({
           className="form-control"
           value={taskDeadline}
           onChange={(e) => setTaskDeadline(e.target.value)}
-          onKeyDown={handleKeyDown} 
+          onKeyDown={handleKeyDown}
         />
         <button
           id="add-task-button"
