@@ -1,0 +1,1 @@
+module.exports = () => console.log("Test route loaded right");

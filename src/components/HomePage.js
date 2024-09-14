@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./HomePage.css";
+import axios from "axios";  // Import Axios for API calls
 import ConfirmModal from "./ConfirmModal";
 import Countdown from "./Countdown";
-import { loadFromLocalStorage, saveToLocalStorage } from "../utils/storage";
 
 function HomePage() {
-  const [lists, setLists] = useState(() => {
-    const savedLists = loadFromLocalStorage("lists");
-    return savedLists || [{ id: 1, title: "Main List", tasks: [] }];
-  });
-
-  const [currentListId, setCurrentListId] = useState(1);
+  const [lists, setLists] = useState([]);
+  const [currentListId, setCurrentListId] = useState(null);
   const [newListTitle, setNewListTitle] = useState("");
   const [newTask, setNewTask] = useState("");
   const [taskPriority, setTaskPriority] = useState("Medium");
@@ -22,15 +17,25 @@ function HomePage() {
   const [editedTaskPriority, setEditedTaskPriority] = useState("Medium");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [showRemoveAllConfirmModal, setShowRemoveAllConfirmModal] =
-    useState(false);
+  const [showRemoveAllConfirmModal, setShowRemoveAllConfirmModal] = useState(false);
+  const currentList = lists.find((list) => list._id === currentListId) || { title: "", tasks: [] };
 
-  const currentList = lists.find((list) => list.id === currentListId);
-
-  // Save lists to local storage whenever lists are updated
   useEffect(() => {
-    saveToLocalStorage("lists", lists);
-  }, [lists]);
+    // Fetch lists and tasks from MongoDB when component mounts
+    const fetchLists = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/lists");
+        setLists(response.data);
+        if (response.data.length > 0) {
+          setCurrentListId(response.data[0]._id);  // Set the first list as the current one
+        }
+      } catch (error) {
+        console.error("Error fetching lists:", error);
+      }
+    };
+
+    fetchLists();
+  }, []);
 
   const getPriorityClass = (priority) => {
     switch (priority) {
@@ -45,148 +50,146 @@ function HomePage() {
     }
   };
 
-  const addTask = () => {
+  // Add a task to the current list and save to the backend
+  const addTask = async () => {
     if (newTask.trim()) {
-      const updatedLists = lists.map((list) =>
-        list.id === currentListId
-          ? {
-              ...list,
-              tasks: [
-                ...list.tasks,
-                {
-                  id: uuidv4(),
-                  text: newTask,
-                  priority: taskPriority,
-                  completed: false,
-                },
-              ],
-            }
-          : list,
-      );
-      setLists(updatedLists);
-      setNewTask("");
-      setTaskPriority("Medium");
+      const taskData = {
+        listId: currentListId, // Make sure currentListId is valid and correct
+        text: newTask,
+        priority: taskPriority,
+        completed: false
+      };
+  
+      try {
+        // Add task to the backend
+        await axios.post('http://localhost:5000/api/tasks', taskData);
+  
+        // Fetch the updated list by ID
+        const updatedListResponse = await axios.get(`http://localhost:5000/api/lists/${currentListId}`);
+        const updatedList = updatedListResponse.data;
+  
+        // Update the lists state with the updated list
+        const updatedLists = lists.map((list) =>
+          list._id === currentListId ? updatedList : list
+        );
+  
+        setLists(updatedLists);
+        setNewTask("");
+        setTaskPriority("Medium");
+      } catch (error) {
+        console.error("Error adding task or fetching list:", error);
+      }
     }
   };
+  
+  
 
-  // Handle "Enter" key press to add a task
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      addTask();
-    }
-  };
-
-  // Handle task deletion (opens confirm modal)
-  const handleDeleteClick = (task) => {
-    setTaskToDelete(task);
-    setShowConfirmModal(true);
-  };
-
-  // Confirm task deletion
-  const handleTaskDelete = () => {
+  // Delete task from the current list and backend
+  const handleTaskDelete = async () => {
     if (taskToDelete) {
-      const updatedLists = lists.map((list) =>
-        list.id === currentListId
-          ? {
-              ...list,
-              tasks: list.tasks.filter((task) => task.id !== taskToDelete.id),
-            }
-          : list,
-      );
-      setLists(updatedLists);
-      setShowConfirmModal(false);
+      try {
+        await axios.delete(`http://localhost:5000/api/tasks/${taskToDelete._id}`);
+        const updatedLists = lists.map((list) =>
+          list._id === currentListId
+            ? { ...list, tasks: list.tasks.filter((task) => task._id !== taskToDelete._id) }
+            : list
+        );
+        setLists(updatedLists);
+        setShowConfirmModal(false);
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
     }
   };
 
   // Add a new list
-  const addList = () => {
+  const addList = async () => {
     if (newListTitle.trim()) {
-      setLists([...lists, { id: uuidv4(), title: newListTitle, tasks: [] }]);
-      setNewListTitle("");
+      const newListData = { title: newListTitle, tasks: [] };
+      try {
+        const response = await axios.post("http://localhost:5000/api/lists", newListData);
+        setLists([...lists, response.data]);
+        setNewListTitle("");
+      } catch (error) {
+        console.error("Error adding list:", error);
+      }
     }
   };
 
-  // Switch to a different list
-  const changeList = (listId) => {
-    setCurrentListId(listId);
+  // Edit task in the current list and update the backend
+  const saveTaskEdit = async (taskId) => {
+    const taskData = { text: editedTaskText, priority: editedTaskPriority };
+
+    try {
+      const response = await axios.put(`http://localhost:5000/api/tasks/${taskId}`, taskData);
+      const updatedLists = lists.map((list) =>
+        list._id === currentListId
+          ? {
+              ...list,
+              tasks: list.tasks.map((task) =>
+                task._id === taskId ? response.data : task
+              ),
+            }
+          : list
+      );
+      setLists(updatedLists);
+      setEditingTaskId(null);
+      setEditedTaskText("");
+      setEditedTaskPriority("Medium");
+      toast.success("Task edited successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error("Error editing task:", error);
+    }
   };
 
-  // Start editing a task (task text and priority)
-  const startEditingTask = (taskId, currentText, currentPriority) => {
-    setEditingTaskId(taskId);
-    setEditedTaskText(currentText);
-    setEditedTaskPriority(currentPriority);
+  const toggleTaskCompletion = async (taskId) => {
+    const taskToToggle = lists
+      .find((list) => list._id === currentListId)
+      .tasks.find((task) => task._id === taskId);
+
+    const updatedTask = {
+      ...taskToToggle,
+      completed: !taskToToggle.completed,
+    };
+
+    try {
+      const response = await axios.put(`http://localhost:5000/api/tasks/${taskId}`, updatedTask);
+      const updatedLists = lists.map((list) =>
+        list._id === currentListId
+          ? {
+              ...list,
+              tasks: list.tasks.map((task) =>
+                task._id === taskId ? response.data : task
+              ),
+            }
+          : list
+      );
+      setLists(updatedLists);
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+    }
   };
 
-  // Save task edits (updates task text and priority)
-  const saveTaskEdit = (taskId) => {
-    const updatedLists = lists.map((list) =>
-      list.id === currentListId
-        ? {
-            ...list,
-            tasks: list.tasks.map((task) =>
-              task.id === taskId
-                ? {
-                    ...task,
-                    text: editedTaskText,
-                    priority: editedTaskPriority,
-                  }
-                : task,
-            ),
-          }
-        : list,
-    );
-    setLists(updatedLists);
-    setEditingTaskId(null);
-    setEditedTaskText("");
-    setEditedTaskPriority("Medium");
-    toast.success("Task edited successfully!", {
-      position: "top-right",
-      autoClose: 2000,
-    });
+  const removeAllTasks = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/api/lists/${currentListId}/tasks`);
+      const updatedLists = lists.map((list) =>
+        list._id === currentListId ? { ...list, tasks: [] } : list
+      );
+      setLists(updatedLists);
+      setShowRemoveAllConfirmModal(false);
+      toast.success("All tasks removed successfully!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      console.error("Error removing all tasks:", error);
+    }
   };
 
-  // Cancel task editing
-  const cancelTaskEdit = () => {
-    setEditingTaskId(null);
-    setEditedTaskText("");
-    setEditedTaskPriority("Medium");
-  };
-
-  // Toggle task completion
-  const toggleTaskCompletion = (taskId) => {
-    const updatedLists = lists.map((list) =>
-      list.id === currentListId
-        ? {
-            ...list,
-            tasks: list.tasks.map((task) =>
-              task.id === taskId
-                ? { ...task, completed: !task.completed }
-                : task,
-            ),
-          }
-        : list,
-    );
-    setLists(updatedLists);
-  };
-
-  // Remove all tasks from the current list
-  // Remove all tasks from the current list
-  const removeAllTasks = () => {
-    const updatedLists = lists.map((list) =>
-      list.id === currentListId ? { ...list, tasks: [] } : list,
-    );
-    setLists(updatedLists);
-    setShowRemoveAllConfirmModal(false); // Close the modal after removing
-
-    // Show success toast notification
-    toast.success("All tasks removed successfully!", {
-      position: "top-right",
-      autoClose: 2000,
-    });
-  };
-
-  // Count the number of completed tasks
   const countCompletedTasks = () => {
     const currentTasks = currentList.tasks || [];
     return currentTasks.filter((task) => task.completed).length;
@@ -213,9 +216,9 @@ function HomePage() {
         <ul className="list-selector">
           {lists.map((list) => (
             <li
-              key={list.id}
-              onClick={() => changeList(list.id)}
-              className={list.id === currentListId ? "active-list" : ""}
+              key={list._id}
+              onClick={() => setCurrentListId(list._id)}
+              className={list._id === currentListId ? "active-list" : ""}
             >
               {list.title}
             </li>
@@ -225,7 +228,7 @@ function HomePage() {
 
       {/* Main content */}
       <main className="main-content">
-        <h2 className="list-title">{currentList.title}</h2>
+        <h2 className="list-title">{currentList?.title}</h2>
 
         {/* Add Task Section */}
         <div className="add-task-container">
@@ -234,7 +237,7 @@ function HomePage() {
             placeholder="Add a task"
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
-            onKeyPress={handleKeyPress} // Trigger task add on Enter key press
+            onKeyPress={(e) => e.key === "Enter" && addTask()}
           />
           <select
             value={taskPriority}
@@ -252,12 +255,12 @@ function HomePage() {
 
         {/* Task List */}
         <div className="task-list">
-          {currentList.tasks.map((task) => (
+          {currentList?.tasks.map((task) => (
             <div
               className={`task ${getPriorityClass(task.priority)} ${task.completed ? "completed" : ""}`}
-              key={task.id}
+              key={task._id}
             >
-              {editingTaskId === task.id ? (
+              {editingTaskId === task._id ? (
                 <div className="edit-mode">
                   <input
                     type="text"
@@ -275,11 +278,11 @@ function HomePage() {
                   </select>
                   <button
                     className="save-btn"
-                    onClick={() => saveTaskEdit(task.id)}
+                    onClick={() => saveTaskEdit(task._id)}
                   >
                     Save
                   </button>
-                  <button className="cancel-btn" onClick={cancelTaskEdit}>
+                  <button className="cancel-btn" onClick={() => setEditingTaskId(null)}>
                     Cancel
                   </button>
                 </div>
@@ -288,32 +291,33 @@ function HomePage() {
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => toggleTaskCompletion(task.id)}
+                    onChange={() => toggleTaskCompletion(task._id)}
                   />
-                  <span className="task-priority">{task.priority}</span>{" "}
-                  {/* Priority Badge */}
-                  <span
-                    className={task.completed ? "task-text completed-task" : ""}
-                  >
+                  <span className="task-priority">{task.priority}</span>
+                  <span className={task.completed ? "task-text completed-task" : ""}>
                     {task.text}
-                  </span>{" "}
-                  {/* Task Text */}
+                  </span>
                 </div>
               )}
 
-              {editingTaskId !== task.id && (
+              {editingTaskId !== task._id && (
                 <div className="task-actions">
                   <button
                     className="edit-btn"
-                    onClick={() =>
-                      startEditingTask(task.id, task.text, task.priority)
-                    }
+                    onClick={() => {
+                      setEditingTaskId(task._id);
+                      setEditedTaskText(task.text);
+                      setEditedTaskPriority(task.priority);
+                    }}
                   >
                     Edit
                   </button>
                   <button
                     className="remove-btn"
-                    onClick={() => handleDeleteClick(task)}
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowConfirmModal(true);
+                    }}
                   >
                     Remove
                   </button>
@@ -326,16 +330,14 @@ function HomePage() {
         {/* Remove All Button */}
         <button
           className="remove-all-btn"
-          onClick={() => {
-            setShowRemoveAllConfirmModal(true);
-          }}
+          onClick={() => setShowRemoveAllConfirmModal(true)}
         >
           Remove All Tasks
         </button>
 
         {showRemoveAllConfirmModal && (
           <ConfirmModal
-            task={null} // No specific task for this action
+            task={null}
             onClose={() => setShowRemoveAllConfirmModal(false)}
             onConfirm={removeAllTasks}
             message="Are you sure you want to remove all tasks from this list?"
@@ -347,14 +349,12 @@ function HomePage() {
           <div
             className="progress-bar bg-success"
             role="progressbar"
-            style={{
-              width: `${progressPercentage}%`,
-            }}
+            style={{ width: `${progressPercentage}%` }}
             aria-valuenow={countCompletedTasks()}
             aria-valuemin="0"
-            aria-valuemax={currentList.tasks.length}
+            aria-valuemax={currentList?.tasks.length}
           >
-            {countCompletedTasks()} / {currentList.tasks.length} tasks completed
+            {countCompletedTasks()} / {currentList?.tasks.length} tasks completed
           </div>
         </div>
 
@@ -363,11 +363,6 @@ function HomePage() {
           <Countdown />
         </div>
       </main>
-
-      {/* Footer */}
-      <footer>
-        <p>© 2024 To-Do List App. All rights reserved.</p>
-      </footer>
 
       {/* Toast Notification Container */}
       <ToastContainer />
@@ -378,16 +373,6 @@ function HomePage() {
           task={taskToDelete}
           onClose={() => setShowConfirmModal(false)}
           onConfirm={handleTaskDelete}
-        />
-      )}
-
-      {/* Confirm Modal for Removing All Tasks */}
-      {showRemoveAllConfirmModal && (
-        <ConfirmModal
-          task={null} // No specific task, just a general action
-          onClose={() => setShowRemoveAllConfirmModal(false)}
-          onConfirm={removeAllTasks}
-          message="Are you sure you want to remove all tasks from this list?"
         />
       )}
     </div>

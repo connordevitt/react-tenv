@@ -7,6 +7,7 @@ const babelParser = require("@babel/eslint-parser");
 module.exports = [
   js.configs.recommended,
   {
+    extends: ["react-app"],
     plugins: {
       react,
       prettier,
