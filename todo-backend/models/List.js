@@ -1,5 +1,4 @@
-// models/List.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const listSchema = new mongoose.Schema({
   title: {
@@ -8,8 +7,8 @@ const listSchema = new mongoose.Schema({
   },
   tasks: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Task',  // Reference the Task model here
-  }],
+    ref: "Task"
+  }]
 });
 
-module.exports = mongoose.model('List', listSchema);
+module.exports = mongoose.model("List", listSchema);

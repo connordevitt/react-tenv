@@ -3,16 +3,16 @@ const mongoose = require("mongoose");
 const taskSchema = new mongoose.Schema({
   text: {
     type: String,
-    required: true
+    required: true,
   },
   priority: {
     type: String,
-    default: "Medium"
+    default: "Medium",
   },
   completed: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("Task", taskSchema);

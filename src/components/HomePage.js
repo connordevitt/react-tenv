@@ -21,20 +21,20 @@ function HomePage() {
   const currentList = lists.find((list) => list._id === currentListId) || { title: "", tasks: [] };
 
   useEffect(() => {
-    // Fetch lists and tasks from MongoDB when component mounts
     const fetchLists = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/lists");
-        setLists(response.data);
         if (response.data.length > 0) {
-          setCurrentListId(response.data[0]._id);  // Set the first list as the current one
+          setLists(response.data);
+          // Set the first list as current list if no currentListId is already set
+          setCurrentListId(response.data[0]._id);  // Set the first list as the current list
         }
       } catch (error) {
         console.error("Error fetching lists:", error);
       }
     };
-
-    fetchLists();
+  
+    fetchLists(); 
   }, []);
 
   const getPriorityClass = (priority) => {
@@ -50,32 +50,37 @@ function HomePage() {
     }
   };
 
-  // Add a task to the current list and save to the backend
   const addTask = async () => {
+    if (!currentListId) {
+      console.error("No current list selected");
+      return;
+    }
+  
     if (newTask.trim()) {
       const taskData = {
-        listId: currentListId, // Make sure currentListId is valid and correct
+        listId: currentListId,  // Use the selected/current list ID
         text: newTask,
         priority: taskPriority,
         completed: false
       };
   
-      try {
-        // Add task to the backend
-        await axios.post('http://localhost:5000/api/tasks', taskData);
+      console.log("Task Data to be Sent:", taskData);
   
-        // Fetch the updated list by ID
+      try {
+        const response = await axios.post("http://localhost:5000/api/tasks", taskData);
+        console.log("Task Added Response:", response.data);
+        
+        // Fetch the updated list
         const updatedListResponse = await axios.get(`http://localhost:5000/api/lists/${currentListId}`);
         const updatedList = updatedListResponse.data;
   
-        // Update the lists state with the updated list
+        // Update the list in the UI
         const updatedLists = lists.map((list) =>
           list._id === currentListId ? updatedList : list
         );
-  
         setLists(updatedLists);
-        setNewTask("");
-        setTaskPriority("Medium");
+        setNewTask("");  // Clear the task input field
+        setTaskPriority("Medium");  // Reset task priority
       } catch (error) {
         console.error("Error adding task or fetching list:", error);
       }
@@ -83,7 +88,6 @@ function HomePage() {
   };
   
   
-
   // Delete task from the current list and backend
   const handleTaskDelete = async () => {
     if (taskToDelete) {
@@ -378,5 +382,6 @@ function HomePage() {
     </div>
   );
 }
+
 
 export default HomePage;
