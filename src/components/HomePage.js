@@ -58,10 +58,10 @@ function HomePage() {
   
     if (newTask.trim()) {
       const taskData = {
-        listId: currentListId,  // Use the selected/current list ID
+        listId: currentListId,
         text: newTask,
         priority: taskPriority,
-        completed: false
+        completed: false,
       };
   
       console.log("Task Data to be Sent:", taskData);
@@ -69,23 +69,27 @@ function HomePage() {
       try {
         const response = await axios.post("http://localhost:5000/api/tasks", taskData);
         console.log("Task Added Response:", response.data);
-        
-        // Fetch the updated list
+  
+        // Fetch the updated list after adding the task
         const updatedListResponse = await axios.get(`http://localhost:5000/api/lists/${currentListId}`);
+        console.log("Fetched Updated List:", updatedListResponse.data); // <-- log the updated list
+  
         const updatedList = updatedListResponse.data;
   
-        // Update the list in the UI
+        // Update the lists in the UI
         const updatedLists = lists.map((list) =>
           list._id === currentListId ? updatedList : list
         );
+  
         setLists(updatedLists);
-        setNewTask("");  // Clear the task input field
-        setTaskPriority("Medium");  // Reset task priority
+        setNewTask(""); // Clear the task input field
+        setTaskPriority("Medium"); // Reset task priority
       } catch (error) {
         console.error("Error adding task or fetching list:", error);
       }
     }
   };
+  
   
   
   // Delete task from the current list and backend

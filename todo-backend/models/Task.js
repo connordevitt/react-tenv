@@ -7,7 +7,7 @@ const taskSchema = new mongoose.Schema({
   },
   priority: {
     type: String,
-    default: "Medium",
+    default: 'Medium',
   },
   completed: {
     type: Boolean,

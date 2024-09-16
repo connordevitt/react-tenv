@@ -7,7 +7,7 @@ const listSchema = new mongoose.Schema({
   },
   tasks: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Task"
+    ref: 'Task'
   }]
 });
 
